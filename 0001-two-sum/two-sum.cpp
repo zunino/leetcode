@@ -7,38 +7,25 @@
  * 10 March 2021
  */
 
-#include <algorithm>
 #include <utility>
 #include <vector>
-#include <list>
 #include <map>
+#include <exception>
 #include <iostream>
 
 std::pair<std::size_t, std::size_t> two_sum(const std::vector<int>& nums, int target) {
     std::size_t size = nums.size();
-    std::map<int, std::list<std::size_t>> indices;
-    for (std::size_t i = 0; i < size; ++i) {
-        indices[nums[i]].push_back(i);
-    }
-    std::vector<int> sorted{nums};
-    std::sort(std::begin(sorted), std::end(sorted));
-    int i = 0;
-    int j = 1;
-    int needed = target - sorted[i];
-    while (sorted[j] != needed) {
-        if (++j == size) {
-            ++i;
-            needed = target - sorted[i];
-            j = i + 1;
+    std::map<int, std::size_t> complements;
+    std::size_t i = 0;
+    for (;; ++i) {
+        int num = nums[i];
+        auto iter = complements.find(num);
+        if (iter != std::end(complements)) {
+            return {iter->second, i};
         }
+        complements[target - num] = i;
     }
-    auto& fcol = indices[sorted[i]];
-    std::size_t f = fcol.front();
-    fcol.pop_front();
-    auto& gcol = indices[sorted[j]];
-    std::size_t g = gcol.front();
-    gcol.pop_front();
-    return {f, g};
+    throw std::invalid_argument{"Invalid input sequence"};
 }
 
 struct TestCase {
@@ -74,8 +61,6 @@ void run_tests(const std::vector<TestCase>& test_cases) {
             continue;
         }
         std::cout << " [OK]\n";
-
-        std::cout << "\n\n";
     }
 }
 
