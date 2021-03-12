@@ -3,8 +3,14 @@
  * 
  * https://leetcode.com/problems/add-two-numbers/
  * 
+ * Since the sum result should also be given as a reversed linked list, the
+ * trick was in realizing the nodes had to be pre-allocated. I wonder if
+ * there's a different mathematical approach that would allow for a simpler
+ * solution.
+ *
  * Andre Zunino <neyzunino@gmail.com>
- * 10 March 2021
+ * Created 10 March 2021
+ * Modified 12 March 2021
  */
 
 #include <stack>
@@ -32,41 +38,48 @@ std::ostream& operator<<(std::ostream& os, const ListNode& node_ref) {
     return os;
 }
 
-int to_int(ListNode* node) {
-    std::stack<int> s;
-    int multiplier = 1;
-    while (node) {
-        s.push(node->val);
-        node = node->next;
-        multiplier *= 10;
-    }
-    int n = 0;
-    multiplier /= 10;
-    while (!s.empty()) {
-        n += s.top() * multiplier;
-        s.pop();
-        multiplier /= 10;
-    }
-    return n;
-}
-
 ListNode* add_two_numbers(ListNode* l1, ListNode* l2) {
-    int sum = to_int(l1) + to_int(l2);
-    std::stack<int> s;
-    while (sum > 1) {
-        s.push(sum % 10);
-        sum /= 10;
+    ListNode* head = new ListNode;
+    ListNode* node = head;
+    ListNode* prev = nullptr;
+    int carry_over = 0;
+    while (l1 && l2) {
+        int sum = l1->val + l2->val + carry_over;
+        carry_over = 0;
+        if (sum > 9) {
+            carry_over = 1;
+            sum -= 10;
+        }
+        node->val = sum;
+        node->next = new ListNode;
+        prev = node;
+        node = node->next;
+        l1 = l1->next;
+        l2 = l2->next;
     }
-    if (s.empty()) {
-        s.push(0);
+    if (l1 || l2) {
+        ListNode* l = l1 ? l1 : l2;
+        while (l) {
+            int sum = l->val + carry_over;
+            carry_over = 0;
+            if (sum > 9) {
+                carry_over = 1;
+                sum -= 10;
+            }
+            node->val = sum;
+            node->next = new ListNode;
+            prev = node;
+            node = node->next;
+            l = l->next;
+        }
     }
-    ListNode* node = new ListNode{s.top()};
-    s.pop();
-    while (!s.empty()) {
-        node = new ListNode{s.top(), node};
-        s.pop();
+    if (carry_over == 0) {
+        delete prev->next;
+        prev->next = nullptr;
+    } else {
+        node->val = 1;
     }
-    return node;
+    return head;
 }
 
 void delete_nodes(ListNode* node) {
@@ -85,10 +98,8 @@ struct TestCase {
 
 ListNode* make_list(std::initializer_list<int>&& items) {
     ListNode* node = nullptr;
-    ListNode* other = nullptr;
     for (auto iter = std::rbegin(items); iter != rend(items); ++iter) {
-        node = new ListNode{*iter, other};
-        other = node;
+        node = new ListNode{*iter, node};
     }
     return node;
 }
@@ -139,6 +150,14 @@ void run_test_cases(std::vector<TestCase>& test_cases) {
     }
 }
 
+void delete_test_cases(const std::vector<TestCase>& test_cases) {
+    for (const TestCase& test : test_cases) {
+        delete_nodes(test.expected);
+        delete_nodes(test.l2);
+        delete_nodes(test.l1);
+    }
+}
+
 int main() {
     std::vector<TestCase> test_cases{
         make_test_case(
@@ -156,7 +175,13 @@ int main() {
             {9, 9, 9, 9},
             {8, 9, 9, 9, 0, 0, 0, 1}
         ),
+        make_test_case(
+            {1, 5, 7},
+            {9, 4, 2},
+            {0, 0, 0, 1}
+        ),
     };
     run_test_cases(test_cases);
+    delete_test_cases(test_cases);
 }
 
