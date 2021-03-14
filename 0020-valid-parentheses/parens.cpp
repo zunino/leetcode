@@ -17,20 +17,12 @@
 namespace {
     unsigned char openers[]{'(', '[', '{'};
     unsigned char closers[]{')', ']', '}'};
+    constexpr int SYMBOLS_LEN = 3;
 }
 
-inline std::size_t find_opener(unsigned char c) {
-    for (std::size_t i = 0; i < 3; ++i) {
-        if (openers[i] == c) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-inline std::size_t find_closer(char c) {
-    for (std::size_t i = 0; i < 3; ++i) {
-        if (closers[i] == c) {
+inline std::size_t index_of(unsigned char c, unsigned char* symbols) {
+    for (std::size_t i = 0; i < SYMBOLS_LEN; ++i) {
+        if (symbols[i] == c) {
             return i;
         }
     }
@@ -42,13 +34,13 @@ bool is_valid(std::string s) {
     std::size_t len = s.size();
     for (std::size_t i = 0; i < len; ++i) {
         char c = s[i];
-        if (auto idx = find_opener(c); idx != -1) {
+        if (auto idx = index_of(c, openers); idx != -1) {
             opener_indices.push(idx);
         } else {
             if (opener_indices.empty()) {
                 return false;
             }
-            auto closer_idx = find_closer(c);
+            auto closer_idx = index_of(c, closers);
             auto opener_idx = opener_indices.top();
             opener_indices.pop();
             if (closer_idx != opener_idx) {
