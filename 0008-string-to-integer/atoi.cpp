@@ -1,11 +1,20 @@
+/**
+ * ATOI.CPP
+ * 
+ * https://leetcode.com/problems/string-to-integer-atoi/
+ * 
+ * Andre Zunino <neyzunino@gmail.com>
+ * Modified 14 March 2021
+ */
+
 #include <string>
-#include <map>
+#include <vector>
 #include <limits>
 #include <sstream>
 #include <iostream>
 
-constexpr int INT_MIN = -2147483648;
-constexpr int INT_MAX = 2147483647;
+constexpr int SIGNED_INT_MIN = -2'147'483'648;
+constexpr int SIGNED_INT_MAX =  2'147'483'647;
 
 inline bool is_digit(char c) {
     return c >= '0' && c <= '9';
@@ -19,61 +28,84 @@ inline bool is_space(char c) {
     return c == ' ';
 }
 
-int my_atoi(std::string str) {
-    const int len = str.size();
-    if (len < 1) return 0;
-    int ini_idx = 0;
-    for (; ini_idx < len; ++ini_idx) {
-        if (!is_space(str[ini_idx])) break;
-    }
-    if (!is_digit(str[ini_idx]) && !is_sign(str[ini_idx])) {
-        return 0;
-    }
-    int fin_idx = ini_idx + 1;
-    for (; fin_idx < len; ++fin_idx) {
-        if (!is_digit(str[fin_idx])) {
-            break;
+int clamp(long int value, bool neg) {
+    int clamped = 0;
+    if (neg) {
+        if (value + SIGNED_INT_MIN > 0) {
+            clamped = SIGNED_INT_MIN;
+        } else {
+            clamped = value * -1;
         }
-    }
-    bool has_sign = is_sign(str[ini_idx]);
-    bool neg = str[ini_idx] == '-';
-    if (has_sign) {
-        ini_idx++;
-    }
-    int num_len = fin_idx - ini_idx;
-    if (has_sign && num_len < 1) {
-        return 0;
-    }
-    int value = 0;
-    if (num_len > 9) {
-        value = neg ? INT_MIN : INT_MAX;
+    } else if (value > SIGNED_INT_MAX) {
+        clamped = SIGNED_INT_MAX;
     } else {
-        int mult = 1;
-        for (int i = 1; i < num_len; ++i) {
-            mult *= 10;
-        }
-        for (int idx = ini_idx; idx < fin_idx; ++idx) {
-            int v = (str[idx] - 0x30) * mult;
-            value += v;
-            mult /= 10;
-        }
-        if (neg) {
-            if (value + INT_MIN > 0) {
-                value = INT_MIN;
-            } else {
-                value *= -1;
-            }
-        } else if (value > INT_MAX) {
-            value = INT_MAX;
-        }
+        clamped = value;
     }
-    return value;
+    return clamped;
 }
 
-using Test_Data = std::map<std::string, int>;
+int my_atoi(std::string str) {
+    const int len = str.size();
+    int ini = 0;
 
-void run_tests(const Test_Data& test_data) {
-    for (const auto& [k, v] : test_data) {
+    /* ignore leading whitespace */
+    for (; ini < len; ++ini) {
+        if (!is_space(str[ini])) break;
+    }
+    if (ini == len) {
+        return 0;
+    }
+
+    /* handle sign */
+    char sign = '+';
+    if (is_sign(str[ini])) {
+        sign = str[ini];
+        ++ini;
+    }
+    bool neg = sign == '-';
+
+    /* ignore leading zeros */
+    while (ini < len && str[ini] == '0') {
+        ++ini;
+    }
+
+    /* check for remaining digits */
+    int fin = ini;
+    while (fin < len && is_digit(str[fin])) {
+        ++fin;
+    };
+
+    int num_len = fin - ini;
+    if (num_len < 1) {
+        return 0;
+    }
+
+    if (num_len > 10) {
+        return neg ? SIGNED_INT_MIN : SIGNED_INT_MAX;
+    }
+
+    long int mult = 1;
+    for (int i = 1; i < num_len; ++i) {
+        mult *= 10;
+    }
+
+    long int value = 0;
+    for (int i = ini; i < fin; ++i) {
+        long int v = (str[i] - 0x30) * mult;
+        value += v;
+        mult /= 10;
+    }
+
+    return clamp(value, neg);
+}
+
+struct TestCase {
+    std::string input;
+    long expected;
+};
+
+void run_tests(const std::vector<TestCase>& test_cases) {
+    for (const auto& [k, v] : test_cases) {
         int got = my_atoi(k);
         std::cout << "Test \"" << k << "\"; expected " << v << "; got " << got;
         if (got != v) {
@@ -85,8 +117,10 @@ void run_tests(const Test_Data& test_data) {
 }
 
 int main() {
-    Test_Data test_data{
+    std::vector<TestCase> test_cases{
         {"", 0},
+        {"0", 0},
+        {"  000  ", 0},
         {"4", 4},
         {"42", 42},
         {"-4", -4},
@@ -94,10 +128,17 @@ int main() {
         {"   -42", -42},
         {"    42  ", 42},
         {"   -42  ", -42},
-        {"91283472332", INT_MAX},
-        {"-91283472332", INT_MIN},
+        {"91283472332", SIGNED_INT_MAX},
+        {"-91283472332", SIGNED_INT_MIN},
+        {"  987 with words ", 987},
         {"words and 987", 0},
+        {"  0000000000012345678", 12345678},
+        {"00000-42a1234", 0},
+        {"abc", 0},
+        {"  abc  ", 0},
+        {"2147483646", 2147483646},
+        {"-6147483648", SIGNED_INT_MIN},
     };
-    run_tests(test_data);
+    run_tests(test_cases);
 }
 
