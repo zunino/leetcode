@@ -16,11 +16,13 @@ int str_str(const std::string& haystack, const std::string& needle) {
     if (needle.empty()) {
         return 0;
     }
+   
     std::size_t haystack_len = haystack.size();
     std::size_t needle_len = needle.size();
     if (needle_len > haystack_len) {
         return -1;
     }
+   
     std::size_t index = 0;
     std::size_t i = 0;
 
@@ -34,21 +36,20 @@ int str_str(const std::string& haystack, const std::string& needle) {
             return -1;
         }
 
-        std::size_t first_char_index = i;
         index = i;
 
+        /* check needle's remaining characters */
         std::size_t j = 1;
         for (; j < needle_len; ++j) {
             if (haystack[++i] != needle[j]) {
                 break;
             }
         }
-        
         if (j == needle_len) {
             return index;
         }
 
-        i = first_char_index + 1;
+        i = index + 1;
     }
 
     if (i == haystack_len) {
