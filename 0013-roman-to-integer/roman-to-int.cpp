@@ -17,6 +17,26 @@
 
 using namespace std::string_literals;
 
+const std::map<unsigned char, unsigned short> roman_values{
+    {'I', 1},
+    {'V', 5},
+    {'X', 10},
+    {'L', 50},
+    {'C', 100},
+    {'D', 500},
+    {'M', 1000},
+};
+
+inline bool is_exception(unsigned char c, unsigned char next) {
+    return
+        (c == 'I' && next == 'V') ||
+        (c == 'I' && next == 'X') ||
+        (c == 'X' && next == 'L') ||
+        (c == 'X' && next == 'C') ||
+        (c == 'C' && next == 'D') ||
+        (c == 'C' && next == 'M');
+}
+
 int roman_to_int(std::string_view s) {
     unsigned short len = s.size();
     unsigned short value = 0;
@@ -27,74 +47,17 @@ int roman_to_int(std::string_view s) {
         --remaining;
 
         if (remaining > 0) {
-            if (c == 'I' && s[i+1] == 'V') {
-                value += 4;
-                --remaining;
-                i += 2;
-                continue;
-            }
-            if (c == 'I' && s[i+1] == 'X') {
-                value += 9;
-                --remaining;
-                i += 2;
-                continue;
-            }
-            if (c == 'X' && s[i+1] == 'L') {
-                value += 40;
-                --remaining;
-                i += 2;
-                continue;
-            }
-            if (c == 'X' && s[i+1] == 'C') {
-                value += 90;
-                --remaining;
-                i += 2;
-                continue;
-            }
-            if (c == 'C' && s[i+1] == 'D') {
-                value += 400;
-                --remaining;
-                i += 2;
-                continue;
-            }
-            if (c == 'C' && s[i+1] == 'M') {
-                value += 900;
+            unsigned char next = s[i+1];
+            if (is_exception(c, next)) {
+                value += roman_values.at(next) - roman_values.at(c);
                 --remaining;
                 i += 2;
                 continue;
             }
         }
 
-        switch (c) {
-        case 'I':
-            value += 1;
-            ++i;
-            break;
-        case 'V':
-            value += 5;
-            ++i;
-            break;
-        case 'X':
-            value += 10;
-            ++i;
-            break;
-        case 'L':
-            value += 50;
-            ++i;
-            break;
-        case 'C':
-            value += 100;
-            ++i;
-            break;
-        case 'D':
-            value += 500;
-            ++i;
-            break;
-        case 'M':
-            value += 1000;
-            ++i;
-            break;
-        }
+        value += roman_values.at(c);
+        ++i;
     }
 
     return value;
