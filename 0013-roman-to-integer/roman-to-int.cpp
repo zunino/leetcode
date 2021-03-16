@@ -41,16 +41,13 @@ int roman_to_int(std::string_view s) {
     unsigned short len = s.size();
     unsigned short value = 0;
 
-    unsigned short remaining = len;
     for (unsigned short i = 0; i < len;) {
         unsigned char c = s[i];
-        --remaining;
 
-        if (remaining > 0) {
+        if (i < len - 1) {
             unsigned char next = s[i+1];
             if (is_exception(c, next)) {
                 value += roman_values.at(next) - roman_values.at(c);
-                --remaining;
                 i += 2;
                 continue;
             }
