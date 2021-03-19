@@ -8,7 +8,9 @@
  */
 
 #include <algorithm>
+#include <ios>
 #include <iterator>
+#include <limits>
 #include <string_view>
 #include <string>
 #include <vector>
@@ -16,11 +18,22 @@
 
 using namespace std::string_literals;
 
+constexpr int MAX_INT_TENTH = std::numeric_limits<int>::max() / 10;
+
 bool is_palindrome(int x) {
-    std::string x_str = std::to_string(x);
-    std::string x_str_rev{x_str};
-    std::reverse(std::begin(x_str_rev), std::end(x_str_rev));
-    return x_str == x_str_rev;
+    if (x < 0) {
+        return false;
+    }
+    int normal = x;
+    int reversed = 0;
+    for (; x != 0; x /= 10) {
+        unsigned char digit = x % 10;
+        if (reversed > MAX_INT_TENTH) {
+            return false;
+        }
+        reversed = reversed * 10 + digit;
+    }
+    return reversed == normal; 
 }
 
 struct TestCase {
@@ -53,11 +66,13 @@ void run_tests(std::vector<TestCase>& test_cases) {
 int main() {
     std::locale locale{""};
     std::cout.imbue(locale);
+    std::cout << std::boolalpha;
     std::vector<TestCase> test_cases{
         {121, true},
         {-121, false},
         {10, false},
         {-101, false},
+        {1'234'567'899, false},
     };
     run_tests(test_cases);
 }
