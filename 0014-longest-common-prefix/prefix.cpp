@@ -17,43 +17,28 @@
 
 using namespace std::string_literals;
 
-struct Node {
-    std::map<char, Node*> children;
-    bool end = false;
-};
-
-Node* build_trie(const std::vector<std::string>& strs) {
-    Node* root = new Node;
-    for (auto& s : strs) {
-        if (s.empty()) {
-            root->end = true;
-            return root;
-        }
-        Node* node = root;
-        for (char c : s) {
-            if (node->children.find(c) == std::end(node->children)) {
-                Node* new_node = new Node;
-                node->children[c] = new_node;
-                node = new_node;
-            } else {
-                node = node->children[c];
+std::string longest_common_prefix(const std::vector<std::string>& strs) {
+    std::string prefix;
+    std::uint8_t str_count = strs.size();
+    if (str_count > 0) {
+        prefix = strs[0];
+        for (std::uint8_t i = 1; i < str_count; ++i) {
+            std::uint8_t prefix_len = prefix.size();
+            if (prefix_len == 0) {
+                break;
+            }
+            const std::string& str = strs[i];
+            std::uint8_t str_len = str.size();
+            std::uint8_t j;
+            for (j = 0; j < prefix_len && j < str_len; ++j) {
+                if (str[j] != prefix[j]) {
+                    break;
+                }
+            }
+            if (j < prefix_len) {
+                prefix.resize(j);
             }
         }
-        node->end = true;
-    }
-    return root;
-}
-
-void delete_trie(Node* trie) {
-}
-
-std::string longest_common_prefix(const std::vector<std::string>& strs) {
-    Node* node = build_trie(strs);
-    std::string prefix;
-    while (node->children.size() == 1 && !node->end) {
-        auto iter = std::begin(node->children);
-        prefix += iter->first;
-        node = iter->second;
     }
     return prefix;
 }
