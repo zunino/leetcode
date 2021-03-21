@@ -12,6 +12,7 @@
  * Modified 21 March 2021
  */
 
+#include <cstdint>
 #include <bits/c++config.h>
 #include <string_view>
 #include <string>
@@ -21,24 +22,25 @@
 using namespace std::string_literals;
 
 struct Position {
-    std::size_t row;
-    std::size_t col;
+    std::uint8_t row;
+    std::uint8_t col;
 };
 
-inline Position rotated_pos(std::size_t cur_row, std::size_t cur_col,
-        std::size_t dim) {
-    return {cur_col, dim - 1 - cur_row};
+inline Position rotated_pos(std::uint8_t cur_row, std::uint8_t cur_col,
+        std::uint8_t dim) {
+    return {cur_col, static_cast<std::uint8_t>(dim - 1 - cur_row)};
 }
 
 void rotate(std::vector<std::vector<int>>& matrix) {
-    std::size_t n = matrix.size();
-    std::size_t half_rows = n / 2;
-    for (std::size_t i = 0; i < half_rows; ++i) {
-        for (std::size_t j = i; j < (n - i - 1); ++j) {
-            std::size_t row = i;
-            std::size_t col = j;
+    std::uint8_t n = matrix.size();
+    std::uint8_t half_rows = n / 2;
+    for (std::uint8_t i = 0; i < half_rows; ++i) {
+        const std::uint8_t col_limit = (n - i - 1);
+        for (std::uint8_t j = i; j < col_limit; ++j) {
+            std::uint8_t row = i;
+            std::uint8_t col = j;
             int value = matrix[row][col];
-            for (std::size_t c = 0; c < 4; ++c) {
+            for (std::uint8_t c = 0; c < 4; ++c) {
                 auto [new_row, new_col] = rotated_pos(row, col, n);
                 int tmp = matrix[new_row][new_col];
                 matrix[new_row][new_col] = value;
