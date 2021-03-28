@@ -15,36 +15,17 @@
 
 using namespace std::string_literals;
 
-struct Score {
-    unsigned index;
-    unsigned value;
-};
-
 int max_area(const std::vector<int>& height) {
     unsigned i = 0;
-    unsigned j = height.size()-1;
-    unsigned mid = j / 2;
-
-    Score best_l{i, 0};
-    Score best_r{j, 0};
-
+    unsigned j = height.size() - 1;
     unsigned max_area = 0;
-    for (; i < j; ++i, --j) {
-        unsigned score_l = height[i] * ((mid-i) + (i==mid? 1:0));
-        unsigned score_r = height[j] * (j-mid);
-        if (score_l > best_l.value) {
-            best_l.value = score_l;
-            best_l.index = i;
-        }
-        if (score_r > best_r.value) {
-            best_r.value = score_r;
-            best_r.index = j;
-        }
-        unsigned area =
-            std::min(height[best_l.index], height[best_r.index]) *
-            (best_r.index - best_l.index);
-        if (area > max_area) {
-            max_area = area;
+    while (i < j) {
+        unsigned area = (j-i) * std::min(height[i], height[j]);
+        max_area = std::max(max_area, area);
+        if (height[i] < height[j]) {
+            ++i;
+        } else {
+            --j;
         }
     }
     return max_area;
@@ -98,6 +79,7 @@ int main() {
         {{1,8,6,5,4,8,3,7}, 42},
         {{1,2,4,3}, 4},
         {{1,8,6,2,5,4,8,25,7}, 49},
+        {{2,3,4,5,18,17,6}, 17},
     };
     run_tests(test_cases);
 }
