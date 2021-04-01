@@ -126,18 +126,10 @@ bool is_same_tree(TreeNode* t1, TreeNode* t2) {
 
             TreeNode* n1 = nodes_1.front();
             nodes_1.pop_front();
-            if (n1) {
-                nodes_1.push_back(n1->left);
-                nodes_1.push_back(n1->right);
-            }
            
             TreeNode* n2 = nodes_2.front();
             nodes_2.pop_front();
-            if (n2) {
-                nodes_2.push_back(n2->left);
-                nodes_2.push_back(n2->right);
-            }
-            
+
             if (!n1 && !n2) {
                 continue;
             }
@@ -147,6 +139,12 @@ bool is_same_tree(TreeNode* t1, TreeNode* t2) {
             if (n1->val != n2->val) {
                 return false;
             }
+
+            nodes_1.push_back(n1->left);
+            nodes_1.push_back(n1->right);
+
+            nodes_2.push_back(n2->left);
+            nodes_2.push_back(n2->right);
         }
         if (!nodes_2.empty()) {
             return false;
