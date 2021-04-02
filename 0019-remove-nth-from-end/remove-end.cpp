@@ -62,19 +62,22 @@ bool compare_lists(const ListNode* l1, const ListNode* l2) {
 }
 
 ListNode* remove_nth_from_end(ListNode* list, int ridx) {
-    std::stack<ListNode*> visited;
+    short len = 0;
     for (ListNode* node = list; node; node = node->next) {
-        visited.push(node);
+        ++len;
     }
-    for (short i = 0; i < ridx-1; ++i) {
-        visited.pop();
-    }
-    ListNode* removed_node = visited.top();
-    visited.pop();
-    if (!visited.empty()) {
-        visited.top()->next = removed_node->next;
+    short prev_idx = len - ridx - 1;
+    ListNode* removed_node;
+    if (prev_idx < 0) {   // removed node is the head of the list
+        removed_node = list;
+        list = list->next;
     } else {
-        list = removed_node->next;
+        ListNode* prev_node = list;
+        for (short i = 0; i < prev_idx; ++i) {
+            prev_node = prev_node->next;
+        }
+        removed_node = prev_node->next;
+        prev_node->next = prev_node->next->next;
     }
     delete removed_node;
     return list;
